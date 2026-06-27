@@ -75,9 +75,12 @@ function logout() {
     window.location.reload();
 }
 
+// Adicione isso ao seu app.js
 function loadDashboardData() {
-    // 1. Verifique se "confirmacoes" é exatamente o nome da sua coleção no Firebase
-    db.collection("confirmacoes").onSnapshot((snapshot) => {
+    console.log("Iniciando leitura do banco...");
+    
+    // Certifique-se de que o nome da coleção "confirmacoes" está correto no seu Firebase
+    db.collection("confirmacoes").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         let adultos = 0;
         let criancas = 0;
         let html = '';
@@ -85,27 +88,27 @@ function loadDashboardData() {
         snapshot.forEach((doc) => {
             const data = doc.data();
             
-            // Soma as quantidades
+            // Soma os valores
             adultos += parseInt(data.adultos) || 0;
             criancas += parseInt(data.criancas) || 0;
 
-            // Monta a linha da tabela
+            // Monta as linhas da tabela
             html += `<tr>
                 <td>${data.nome}</td>
                 <td class="text-center">${data.adultos}</td>
                 <td class="text-center">${data.criancas}</td>
-                <td>${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
+                <td class="small">${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : '--'}</td>
             </tr>`;
         });
 
-        // Atualiza os contadores na tela
+        // Atualiza os números no Dashboard
         document.getElementById('totalAdults').innerText = adultos;
         document.getElementById('totalChildren').innerText = criancas;
         document.getElementById('totalGeneral').innerText = adultos + criancas;
-        document.getElementById('totalRows').innerText = snapshot.size + " famílias registradas";
         
-        // Atualiza a tabela
+        // Atualiza a lista
         document.getElementById('guestsTableBody').innerHTML = html;
+        console.log("Dados carregados com sucesso!");
     });
 }
 
