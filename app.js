@@ -63,23 +63,33 @@ function logout() {
 }
 
 function loadDashboardData() {
-    db.collection("confirmacoes").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    // Escuta a coleção "confirmacoes"
+    db.collection("confirmacoes").onSnapshot((snapshot) => {
         let adultos = 0;
         let criancas = 0;
         let html = '';
 
+        // Se o snapshot estiver vazio, significa que o Firestore não tem documentos nessa coleção
+        if (snapshot.empty) {
+            console.log("Nenhum documento encontrado na coleção 'confirmacoes'");
+        }
+
         snapshot.forEach((doc) => {
             const data = doc.data();
+            
+            // Soma os valores. Usamos a estrutura exata do seu .add()
             adultos += parseInt(data.adultos) || 0;
             criancas += parseInt(data.criancas) || 0;
 
-            html += `<tr class="border-b">
-                <td class="p-4">${data.nome || 'Convidado'}</td>
+            // Monta a linha
+            html += `<tr>
+                <td class="p-4">${data.nome || 'Sem nome'}</td>
                 <td class="p-4 text-center">${data.adultos || 0}</td>
                 <td class="p-4 text-center">${data.criancas || 0}</td>
             </tr>`;
         });
 
+        // Atualiza os contadores na tela
         document.getElementById('totalAdults').innerText = adultos;
         document.getElementById('totalChildren').innerText = criancas;
         document.getElementById('totalGeneral').innerText = adultos + criancas;
