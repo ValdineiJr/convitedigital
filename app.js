@@ -1,5 +1,5 @@
 
-// Your web app's Firebase configuration
+// 1. CONFIGURAÇÃO DO FIREBASE (Coloque suas chaves aqui)
 const firebaseConfig = {
   apiKey: "AIzaSyDmNSptGUoF59NM683v7m8olumq940gsrM",
   authDomain: "convitedigitalalice.firebaseapp.com",
@@ -8,21 +8,19 @@ const firebaseConfig = {
   messagingSenderId: "69410023406",
   appId: "1:69410023406:web:21af5c6e3c82af18c810ff"
 };
-// 1. INICIALIZAÇÃO
-// Certifique-se de que o firebaseConfig está definido acima destas linhas
-firebase.initializeApp(firebaseConfig);
+
+// Inicializa o Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
-// 2. LÓGICA DO FORMULÁRIO (Convite)
+// 2. LÓGICA DO FORMULÁRIO (Usado no index.html)
 const rsvpForm = document.getElementById('rsvpForm');
 if (rsvpForm) {
     rsvpForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const btnSubmit = document.getElementById('btnSubmit');
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = 'Enviando...';
-
         const guestName = document.getElementById('guestName').value.trim();
         const adultsCount = parseInt(document.getElementById('adultsCount').value) || 0;
         const childrenCount = parseInt(document.getElementById('childrenCount').value) || 0;
@@ -36,17 +34,12 @@ if (rsvpForm) {
         .then(() => {
             new bootstrap.Modal(document.getElementById('successModal')).show();
             rsvpForm.reset();
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = "CONFIRMAR PRESENÇA";
         })
-        .catch((error) => {
-            alert("Erro ao confirmar: " + error.message);
-            btnSubmit.disabled = false;
-        });
+        .catch((error) => alert("Erro ao confirmar: " + error.message));
     });
 }
 
-// 3. LÓGICA DO ADMIN
+// 3. LÓGICA DO ADMIN (Usado no admin.html)
 const ADMIN_PASSWORD = "Alice#2026&";
 const ADMIN_USER = "patyramalho";
 
@@ -56,22 +49,20 @@ function verifyAccess() {
     
     if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
         localStorage.setItem('isLoggedIn', 'true');
-        document.getElementById('loginBlock').classList.add('d-none');
-        document.getElementById('adminDashboard').classList.remove('d-none');
+        document.getElementById('loginBlock').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
         loadDashboardData();
     } else {
-        document.getElementById('loginError').classList.remove('d-none');
+        document.getElementById('loginError').classList.remove('hidden');
     }
 }
 
 function logout() {
     localStorage.removeItem('isLoggedIn');
-    window.location.reload(); // Recarrega para limpar o estado da tela
+    window.location.reload();
 }
 
 function loadDashboardData() {
-    console.log("Iniciando leitura do banco...");
-    
     db.collection("confirmacoes").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         let adultos = 0;
         let criancas = 0;
@@ -82,11 +73,10 @@ function loadDashboardData() {
             adultos += parseInt(data.adultos) || 0;
             criancas += parseInt(data.criancas) || 0;
 
-            html += `<tr>
-                <td>${escapeHtml(data.nome)}</td>
-                <td class="text-center">${data.adultos}</td>
-                <td class="text-center">${data.criancas}</td>
-                <td class="small">${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : '--'}</td>
+            html += `<tr class="border-b">
+                <td class="p-4">${data.nome || 'Convidado'}</td>
+                <td class="p-4 text-center">${data.adultos || 0}</td>
+                <td class="p-4 text-center">${data.criancas || 0}</td>
             </tr>`;
         });
 
