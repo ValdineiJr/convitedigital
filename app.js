@@ -15,6 +15,14 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
+window.onload = function() {
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+        document.getElementById('loginBlock').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        loadDashboardData();
+    }
+};
+
 // 2. LÓGICA DO FORMULÁRIO (Usado no index.html)
 const rsvpForm = document.getElementById('rsvpForm');
 if (rsvpForm) {
